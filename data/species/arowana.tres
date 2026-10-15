@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpeciesData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/species_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "arowana"
+display_name = "Arowana"
+unlock_level = 15
+base_cost = 930000000.0
+coins_per_sec = 300.0
+zone = 0
+color = Color(0.85, 0.75, 0.3, 1)
+body_size = Vector2(84, 22)

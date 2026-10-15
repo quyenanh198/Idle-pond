@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpeciesData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/species_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "goldfish"
+display_name = "Goldfish"
+unlock_level = 3
+base_cost = 1900.0
+coins_per_sec = 3.0
+zone = 1
+color = Color(1, 0.75, 0.1, 1)
+body_size = Vector2(34, 18)

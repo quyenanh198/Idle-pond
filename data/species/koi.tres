@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpeciesData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/species_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "koi"
+display_name = "Koi"
+unlock_level = 12
+base_cost = 68000000.0
+coins_per_sec = 120.0
+zone = 0
+color = Color(1, 0.35, 0.25, 1)
+body_size = Vector2(64, 24)

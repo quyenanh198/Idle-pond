@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpeciesData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/species_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "tetra"
+display_name = "Tetra"
+unlock_level = 5
+base_cost = 26000.0
+coins_per_sec = 8.0
+zone = 1
+color = Color(0.2, 0.7, 1, 1)
+body_size = Vector2(24, 10)

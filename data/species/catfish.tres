@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpeciesData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/species_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "catfish"
+display_name = "Catfish"
+unlock_level = 7
+base_cost = 360000.0
+coins_per_sec = 20.0
+zone = 2
+color = Color(0.45, 0.42, 0.35, 1)
+body_size = Vector2(56, 18)

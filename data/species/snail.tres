@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpeciesData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/species_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "snail"
+display_name = "Snail"
+unlock_level = 2
+base_cost = 140.0
+coins_per_sec = 1.25
+zone = 2
+color = Color(0.6, 0.45, 0.3, 1)
+body_size = Vector2(22, 16)

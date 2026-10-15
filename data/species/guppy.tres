@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SpeciesData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/species_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "guppy"
+display_name = "Guppy"
+unlock_level = 1
+base_cost = 10.0
+coins_per_sec = 0.5
+zone = 0
+color = Color(1, 0.55, 0.2, 1)
+body_size = Vector2(26, 12)
