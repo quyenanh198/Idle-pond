@@ -74,10 +74,14 @@ food_multiplier = 1 + 0.25 × food_level
 - Pond capacity limits total fish owned (all species combined). Buying is
   disabled when the pond is full.
 
+### New game
+
+A new game starts with 15 coins and no fish (enough for the first Guppy).
+
 ### XP and levels
 
 - 1 XP per coin spent (fish and upgrades). Selling does not remove XP.
-- XP required to go from level L to L+1: `50 × 2.2^(L-1)`.
+- XP required to go from level L to L+1: `50 × 3.5^(L-1)`.
 - Level is unbounded; species unlocks end at level 15.
 
 ### Species
@@ -85,13 +89,18 @@ food_multiplier = 1 + 0.25 × food_level
 | Unlock Lv | Species | Zone | Base cost | Coins/sec |
 |---|---|---|---|---|
 | 1 | Guppy | surface | 10 | 0.5 |
-| 2 | Snail | bottom | 60 | 2 |
-| 3 | Goldfish | mid | 400 | 10 |
-| 5 | Tetra | mid | 2,500 | 45 |
-| 7 | Catfish | bottom | 15,000 | 200 |
-| 9 | Angelfish | mid | 100,000 | 1,000 |
-| 12 | Koi | surface | 750,000 | 5,500 |
-| 15 | Arowana | surface | 6,000,000 | 30,000 |
+| 2 | Snail | bottom | 140 | 1.25 |
+| 3 | Goldfish | mid | 1,900 | 3 |
+| 5 | Tetra | mid | 26,000 | 8 |
+| 7 | Catfish | bottom | 360,000 | 20 |
+| 9 | Angelfish | mid | 4,900,000 | 50 |
+| 12 | Koi | surface | 68,000,000 | 120 |
+| 15 | Arowana | surface | 930,000,000 | 300 |
+
+Rule: every species earns more per fish than the one before it (pond capacity
+is limited, so a higher tier must always be worth its slot), and payback time
+(cost ÷ coins/sec) grows about 5.5× per tier, which is what stretches
+progression over days.
 
 Names and numbers are placeholders, tunable in data files.
 
@@ -115,9 +124,14 @@ Values are floats. Display with suffixes: K, M, B, T (e.g. `1.2K`, `3.4M`).
 
 ### Pacing targets (verified by simulation test)
 
+Tuned with a prototype simulation on 2026-10-15: level 2 at ~60 s, level 15
+at ~4.0 days (8.3 days if the player never buys Deep Sleep).
+
+
 - First new species (level 2) within 2 minutes of a new game.
 - All 8 species (level 15) within 3–5 days of simulated idle play
-  (model: player checks in periodically and spends greedily).
+  (model: 4 check-ins of 10 minutes per day, ~3h50m apart, plus 8 h sleep;
+  the player spends greedily on the best income gain per coin).
 
 ## 4. Backend and saving
 
@@ -164,8 +178,12 @@ included.
 1. Load local save; game is playable immediately.
 2. Fetch cloud save. If both exist, keep the one with the higher
    `lifetime_coins` (robust against clock differences between devices).
-3. Offline earnings use server `elapsed_seconds` when the cloud call succeeds,
-   otherwise device-clock elapsed time since local `saved_at`.
+3. Offline time:
+   - cloud save chosen: server `elapsed_seconds`;
+   - local save chosen: device-clock time since local `saved_at`, but never more
+     than the server `elapsed_seconds` when a cloud row exists (stops clock
+     cheating while not over-paying when the cloud copy is older);
+   - negative values count as 0.
 
 ### Error handling
 
