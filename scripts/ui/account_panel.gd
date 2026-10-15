@@ -40,7 +40,6 @@ func _ready() -> void:
 	visibility_changed.connect(func():
 		if is_visible_in_tree():
 			_refresh_status())
-	_refresh_status()
 
 
 func _refresh_status() -> void:

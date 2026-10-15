@@ -9,6 +9,7 @@ ANON_KEY = "test-anon-key"
 tokens = {}  # access token -> user id
 refresh = {}  # refresh token -> user id
 saves = {}  # user id -> (data, version, lifetime, updated_at)
+stats = {"signups": 0}
 
 
 def issue(user_id):
@@ -35,12 +36,18 @@ class Handler(BaseHTTPRequestHandler):
         token = self.headers.get("Authorization", "").removeprefix("Bearer ")
         return tokens.get(token)
 
+    def do_GET(self):
+        if self.path == "/test/stats":
+            return self.reply(200, stats)
+        self.reply(404, {"message": "not found"})
+
     def do_POST(self):
         if self.headers.get("apikey") != ANON_KEY:
             return self.reply(401, {"message": "Invalid API key"})
         length = int(self.headers.get("Content-Length", 0))
         body = json.loads(self.rfile.read(length) or b"{}")
         if self.path == "/auth/v1/signup":
+            stats["signups"] += 1
             return self.reply(200, issue(str(uuid.uuid4())))
         if self.path == "/auth/v1/token?grant_type=refresh_token":
             uid = refresh.pop(body.get("refresh_token"), None)

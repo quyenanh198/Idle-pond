@@ -56,3 +56,20 @@ func test_bad_password_reports_error():
 	var res: Dictionary = await client.sign_in_with_password("a@b.c", "wrong")
 	assert_false(res.ok)
 	assert_eq(res.error, "Invalid login credentials")
+
+
+func test_concurrent_ensure_session_signs_up_once():
+	if client == null:
+		pending("MOCK_SUPABASE_URL not set")
+		return
+	var before := await _signups()
+	var first := func(): return await client.ensure_session()
+	first.call()  # not awaited: runs concurrently with the next call
+	assert_true(await client.ensure_session())
+	await wait_seconds(0.5)
+	assert_eq(await _signups(), before + 1, "only one guest account created")
+
+
+func _signups() -> int:
+	var res: Dictionary = await client._request(HTTPClient.METHOD_GET, "/test/stats")
+	return int(res.data.signups)

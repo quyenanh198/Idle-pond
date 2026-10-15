@@ -7,10 +7,13 @@ const CONFIG_PATH := "res://config/supabase.cfg"
 const SESSION_PATH := "user://session.cfg"
 const TIMEOUT_SEC := 10.0
 
+signal _session_ensured(ok: bool)
+
 var url := ""
 var anon_key := ""
 var session: Dictionary = {}
 var session_path := SESSION_PATH
+var _ensuring := false
 
 
 func _ready() -> void:
@@ -34,7 +37,18 @@ func is_signed_in() -> bool:
 
 
 ## Makes sure there is a valid session: refreshes or signs in as a guest. False if offline.
+## Concurrent callers share one attempt, so two callers never create two guest accounts.
 func ensure_session() -> bool:
+	if _ensuring:
+		return await _session_ensured
+	_ensuring = true
+	var ok: bool = await _ensure_session()
+	_ensuring = false
+	_session_ensured.emit(ok)
+	return ok
+
+
+func _ensure_session() -> bool:
 	if not is_configured():
 		return false
 	if not is_signed_in():
