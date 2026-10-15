@@ -28,3 +28,4 @@ textures/vram_compression/import_etc2_astc=true
 [autoload]
 
 GameState="*res://scripts/autoload/game_state.gd"
+SaveService="*res://scripts/autoload/save_service.gd"
