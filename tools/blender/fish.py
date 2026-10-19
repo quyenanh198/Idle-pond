@@ -30,7 +30,7 @@ KOI = dict(
 )
 GOLDFISH = dict(
     length=1.45, h_top=0.40, h_bot=0.35, w_max=0.24, barbels=False, lips=0.45,
-    eye_r=0.05, eye_s=0.13, scales_u=40, tail="comet", tail_len=1.15, dorsal_h=1.35,
+    eye_r=0.05, eye_s=0.13, scales_u=56, tail="comet", tail_len=1.15, dorsal_h=1.35,
     iris=(0.86, 0.66, 0.24), iris_metal=0.35,
 )
 SPECIES = {
@@ -446,18 +446,18 @@ def paint():
         belly = smoothstep(0.1, -0.7, lift)
         base = np.stack([0.42 + 0.06 * mott, 0.27 + 0.04 * mott, 0.13 + 0.02 * mott], -1).astype(F32)
         albedo = mix(base, (0.66, 0.52, 0.33), belly * 0.7)
-        albedo *= (0.94 + 0.10 * jit)[..., None]
+        albedo *= (1 + 0.10 * (jit - 0.6) * scale_zone)[..., None]
         return albedo, np.zeros_like(u), (0.16, 0.09, 0.04), 0.55 * np.ones_like(u), 0.55
     if SKIN == "ogon":
         base = np.stack([0.84 + 0.04 * mott, 0.85 + 0.04 * mott, 0.84 + 0.03 * mott], -1).astype(F32)
-        albedo = base * (0.95 + 0.08 * jit)[..., None]
-        return albedo, np.zeros_like(u), (1.0, 1.0, 0.98), 0.35 * np.ones_like(u), 0.55
+        albedo = base * (1 + 0.08 * (jit - 0.6) * scale_zone)[..., None]
+        return albedo, np.zeros_like(u), (1.0, 1.0, 0.98), 0.35 * np.ones_like(u), 0.38
     if SKIN == "goldfish":
         belly = smoothstep(0.2, -0.7, lift)
-        base = np.stack([0.95 * (0.9 + 0.15 * mott), 0.36 + 0.10 * mott, 0.05 + 0.02 * mott], -1).astype(F32)
+        base = np.stack([0.93 * (0.9 + 0.15 * mott), 0.27 + 0.08 * mott, 0.035 + 0.015 * mott], -1).astype(F32)
         albedo = mix(base, (0.98, 0.66, 0.28), belly * 0.6)
-        albedo *= (0.93 + 0.12 * jit)[..., None]
-        return albedo, np.zeros_like(u), (1.0, 0.72, 0.30), 0.30 * np.ones_like(u), 0.40
+        albedo *= (1 + 0.12 * (jit - 0.6) * scale_zone)[..., None]
+        return albedo, np.zeros_like(u), (1.0, 0.62, 0.22), 0.25 * np.ones_like(u), 0.25
     raise ValueError(f"unknown skin {SKIN}")
 
 
@@ -789,7 +789,8 @@ def render(name, frame, cam_loc, tgt, lens, focus):
     bpy.ops.render.render(write_still=True)
 
 
-render("closeup", 4, (CX + 1.45 * K, -2.55 * K, 0.57 * K), (CX, 0, -0.02), 50, (EYE_P.x, -0.2 * KH, 0.08))
+TGT_X = NOSE_X - 0.443 * TOTAL
+render("closeup", 4, (TGT_X + 1.45 * K, -2.55 * K, 0.57 * K), (TGT_X, 0, -0.02), 50, (EYE_P.x, -0.2 * KH, 0.08))
 render("head", 4, (EYE_P.x + 0.92 * KH, -0.95 * KH, 0.28), (EYE_P.x - 0.08, 0, -0.02), 60, (EYE_P.x + 0.04, -EYE_P.y, EYE_P.z))
 
 # pond view at the game camera angle: gravel floor, tinted water, rippled surface
