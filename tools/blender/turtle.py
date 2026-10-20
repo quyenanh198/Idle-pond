@@ -27,15 +27,15 @@ F32 = np.float32
 
 COLORS = {
     "slider": dict(
-        shell=(0.20, 0.25, 0.10), shell_mark=(0.78, 0.72, 0.22), seam=(0.06, 0.07, 0.03),
+        shell=(0.11, 0.14, 0.06), shell_mark=(0.78, 0.72, 0.22), seam=(0.06, 0.07, 0.03),
         plastron=(0.86, 0.78, 0.36), plastron_spot=(0.18, 0.17, 0.08),
         skin=(0.18, 0.25, 0.10), stripe=(0.86, 0.80, 0.28), ear=(0.82, 0.10, 0.05),
         iris=(0.72, 0.70, 0.26), pupil=(0.02, 0.02, 0.02), claw=(0.10, 0.09, 0.07, 1),
     ),
     "slider_albino": dict(
-        shell=(0.84, 0.80, 0.42), shell_mark=(0.98, 0.78, 0.36), seam=(0.62, 0.55, 0.28),
+        shell=(0.86, 0.72, 0.30), shell_mark=(1.0, 0.58, 0.16), seam=(0.55, 0.42, 0.16),
         plastron=(0.96, 0.90, 0.62), plastron_spot=None,
-        skin=(0.93, 0.86, 0.56), stripe=(1.0, 0.96, 0.76), ear=(0.98, 0.42, 0.22),
+        skin=(0.97, 0.90, 0.62), stripe=(1.0, 0.78, 0.20), ear=(1.0, 0.32, 0.12),
         iris=(0.78, 0.16, 0.12), pupil=(0.30, 0.02, 0.02), claw=(0.85, 0.80, 0.62, 1),
     ),
 }
@@ -120,22 +120,22 @@ whole_group(shell, "Root")
 
 # ================================================================ head and neck: a tube from inside the shell to the snout
 NECK = Vector((A * 0.80, 0, 0.02))
-SNOUT = Vector((A + 0.40, 0, 0.07))
+SNOUT = Vector((A + 0.34, 0, 0.07))
 NH, NRH = 48, 32
 
 
 def head_radius(uh):
     """uh: 0 at the snout tip, 1 at the neck base."""
-    if uh < 0.5:
-        g = math.sqrt(max(0.0, 1 - ((0.5 - uh) / 0.5) ** 2))
-        return 0.025 + 0.075 * g
-    return 0.10 - 0.012 * sstep(0.5, 0.75, uh)
+    if uh < 0.12:   # rounded, pointed snout
+        return 0.022 + 0.048 * math.sqrt(max(0.0, 1 - ((0.12 - uh) / 0.12) ** 2))
+    # widest at the jaw behind the eyes, narrower neck, thickening into the skin folds at the shell
+    return 0.07 + 0.015 * sstep(0.12, 0.28, uh) - 0.017 * sstep(0.30, 0.50, uh) + 0.017 * sstep(0.60, 1.0, uh)
 
 
 def head_point(uh, th):
     c = SNOUT + (NECK - SNOUT) * uh
     r = head_radius(uh)
-    squash = 0.82 * (0.9 + 0.1 * sstep(0.0, 0.3, uh))
+    squash = 0.78 * (0.9 + 0.1 * sstep(0.0, 0.3, uh))
     return c + Vector((0, r * math.cos(th), r * squash * math.sin(th)))
 
 
@@ -157,7 +157,7 @@ head = to_obj("Head", bm)
 head.modifiers.new("sub", "SUBSURF").levels = 1
 whole_group(head, "Head")
 
-EYE_UH, EYE_TH, EYE_R = 0.17, 0.45, 0.021
+EYE_UH, EYE_TH, EYE_R = 0.15, 0.50, 0.021
 eyes = []
 for side in (1, -1):
     th = EYE_TH if side > 0 else math.pi - EYE_TH
@@ -216,7 +216,7 @@ def limb(name, base, direction, length, r0, foot_w, n_claws, claw_len, group):
         off = (k / (n_claws - 1) - 0.5) * 1.3 * foot_w
         bmc = bmesh.new()
         bmc.loops.layers.uv.new("UVMap")
-        bmesh.ops.create_cone(bmc, cap_ends=True, segments=8, radius1=0.009, radius2=0.0015, depth=claw_len)
+        bmesh.ops.create_cone(bmc, cap_ends=True, segments=8, radius1=0.012, radius2=0.002, depth=claw_len)
         cdir = (d + Vector((0, 0, -0.35))).normalized()
         rot = Vector((0, 0, 1)).rotation_difference(cdir).to_matrix().to_4x4()
         bmesh.ops.transform(bmc, matrix=Matrix.Translation(tip_c + side * off + cdir * claw_len * 0.5) @ rot, verts=bmc.verts)
@@ -229,11 +229,11 @@ def limb(name, base, direction, length, r0, foot_w, n_claws, claw_len, group):
 legs, claws = [], []
 for side, tag in ((1, "L"), (-1, "R")):
     leg, cl = limb(f"Front{tag}", Vector((A * 0.55, B * 0.78 * side, -0.04)), Vector((0.55, 0.85 * side, -0.25)),
-                   0.34, 0.055, 0.075, 5, 0.06, f"LegF{tag}")
+                   0.34, 0.055, 0.075, 5, 0.04, f"LegF{tag}")
     legs.append(leg)
     claws += cl
     leg, cl = limb(f"Rear{tag}", Vector((-A * 0.62, B * 0.72 * side, -0.05)), Vector((-0.55, 0.85 * side, -0.25)),
-                   0.30, 0.06, 0.095, 4, 0.03, f"LegR{tag}")
+                   0.30, 0.06, 0.095, 4, 0.025, f"LegR{tag}")
     legs.append(leg)
     claws += cl
 bmt = bmesh.new()
@@ -320,14 +320,14 @@ groove = smoothstep(0.012, 0.0, d_seam)
 annuli = 0.5 + 0.5 * np.cos(d_seam * 2 * np.pi * 28)
 noise = fbm(cu_, cv_, 8, 8, 5, 5)
 base = np.asarray(C["shell"], F32) * (0.75 + 0.5 * noise)[..., None]
-stripes = smoothstep(0.90, 0.97, 0.5 + 0.5 * np.sin(X * 22 + 3 * noise + np.abs(Y) * 6)) * ((r < 0.82) & ~vertebral)
+stripes = smoothstep(0.90, 0.97, 0.5 + 0.5 * np.sin(X * 22 + 7 * fbm(cu_, cv_, 14, 14, 7, 4) + np.abs(Y) * 6)) * ((r < 0.82) & ~vertebral)
 marg_bar = smoothstep(0.10, 0.02, np.abs(marg_frac - 0.5)) * (r > 0.86)
 blot = smoothstep(0.72, 0.80, fbm(cu_, cv_, 18, 18, 9, 3)) * (r < 0.82)
 marks = np.clip(stripes + marg_bar * 0.8 + blot * 0.6, 0, 1) * smoothstep(0.0, 0.03, d_seam)
 shell_col = mix(base, C["shell_mark"], marks)
-shell_col *= (0.92 + 0.08 * annuli * smoothstep(0.0, 0.12, d_seam))[..., None]
+shell_col *= (0.96 + 0.04 * annuli * smoothstep(0.0, 0.12, d_seam))[..., None]
 shell_col = mix(shell_col, C["seam"], groove)
-shell_h = -groove + 0.06 * annuli + 0.25 * smoothstep(0.0, 0.15, d_seam) + 0.05 * noise
+shell_h = -groove + 0.02 * annuli + 0.25 * smoothstep(0.0, 0.15, d_seam) + 0.05 * noise
 img_shell = save(f"{VARIANT}_carapace", shell_col)
 img_shell_n = save(f"{VARIANT}_carapace_normal", normal_from(shell_h, 6), True)
 
@@ -358,10 +358,10 @@ img_skin = save(f"{VARIANT}_skin", skin_col)
 img_skin_n = save(f"{VARIANT}_skin_normal", normal_from(skin_h, 3), True)
 
 # head: finer stripes, the red "ear" patch behind each eye, mouth line, nostrils
-hs = smoothstep(0.08, 0.03, np.abs(((sv * 18 + wob) % 1.0) - 0.5))
+hs = smoothstep(0.08, 0.03, np.abs(((sv * 18 + wob) % 1.0) - 0.5)) * smoothstep(0.02, 0.10, su)   # fade where stripes converge at the snout
 head_col = mix(skin_base, C["stripe"], hs)
-for v_ear in (0.056, 0.444):
-    ear = smoothstep(1.0, 0.8, np.sqrt(((su - 0.36) / 0.075) ** 2 + ((sv - v_ear) / 0.035) ** 2))
+for v_ear in (0.07, 0.43):
+    ear = smoothstep(1.0, 0.8, np.sqrt(((su - 0.31) / 0.10) ** 2 + ((sv - v_ear) / 0.022) ** 2))   # elongated stripe behind the eye
     head_col = mix(head_col, C["ear"], ear)
 for v_mouth in (0.955, 0.545):
     mouth = smoothstep(0.008, 0.0, np.abs(sv - v_mouth - 0.02 * su)) * smoothstep(0.25, 0.18, su)
@@ -410,12 +410,12 @@ def material(name, img, nrm=None, rough=0.5, coat=0.0, sss=0.0, color=None):
     return m
 
 
-M_CARAPACE = material("Carapace", img_shell, img_shell_n, rough=0.42, coat=0.35)
+M_CARAPACE = material("Carapace", img_shell, img_shell_n, rough=0.55, coat=0.1)
 M_PLASTRON = material("Plastron", img_plast, img_plast_n, rough=0.5, coat=0.2)
 M_SKIN = material("Skin", img_skin, img_skin_n, rough=0.55, coat=0.2, sss=0.1)
 M_HEAD = material("HeadSkin", img_head, None, rough=0.5, coat=0.25, sss=0.1)
 M_EYE = material("Eye", img_eye, None, rough=0.1, coat=1.0)
-M_CLAW = material("Claw", None, None, rough=0.35, coat=0.3, color=C["claw"])
+M_CLAW = material("Claw", None, None, rough=0.5, color=C["claw"])
 shell.data.materials.append(M_CARAPACE)
 shell.data.materials.append(M_PLASTRON)
 

@@ -2,3 +2,4 @@
 build/
 *.tmp
 /android/
+tools/blender/__pycache__/
